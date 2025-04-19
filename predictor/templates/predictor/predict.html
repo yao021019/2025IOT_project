@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>露菌病預測結果</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .left, .right {
+            width: 48%;
+        }
+        h1 {
+            text-align: center;
+        }
+        #probabilityChart {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>露菌病預測</h1>
+
+    <div class="container">
+        <div class="left">
+            <h3>今天的預測機率：</h3>
+            <p id="today-probability">載入中...</p>
+        </div>
+
+        <div class="right">
+            <h3>最近七筆預測機率折線圖：</h3>
+            <canvas id="probabilityChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // 當頁面載入完成時，呼叫後端 API 抓資料
+        fetch('/predict/')
+            .then(response => response.json())
+            .then(data => {
+                // 顯示今天的機率
+                document.getElementById('today-probability').textContent = (data.probability_of_1 * 100).toFixed(2) + '%';
+
+                // 整理最近七筆資料
+                const dates = data.results.map(entry => entry.date);
+                const probabilities = data.results.map(entry => entry.probability_of_1);
+
+                // 畫圖
+                const ctx = document.getElementById('probabilityChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: '預測機率',
+                            data: probabilities,
+                            fill: false,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 1
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+</body>
+
+</html>

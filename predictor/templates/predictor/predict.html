@@ -2,83 +2,260 @@
 <html lang="zh-Hant">
 
 <head>
-    <meta charset="UTF-8">
-    <title>露菌病預測結果</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .container {
-            display: flex;
-            justify-content: space-between;
-        }
-        .left, .right {
-            width: 48%;
-        }
-        h1 {
-            text-align: center;
-        }
-        #probabilityChart {
-            width: 100%;
-            height: 300px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>露菌病預測結果</title>
+
+  <!-- 載入 Chart.js 圖表套件 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* 整體網頁基本樣式 */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #D4DFC7; /* 淺綠背景 */
+      color: #333;
+    }
+
+    /* 標題樣式 */
+    h1 {
+      display: inline-block;
+      margin: 1 auto;
+      background-color: #FEF6C9; /* 淺黃色背景 */
+      color: #272727;
+      padding: 12px 30px;
+      border-radius: 20px; /* 圓角 */
+      box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.1); /* 陰影 */
+      font-size: 36px;
+      text-align: center;
+      letter-spacing: 2px;
+      margin: 0 0px 10px;
+    }
+
+    /* 主容器，使用 Flex 排版左右兩欄 */
+    .main-container {
+      display: flex;
+      flex-wrap: wrap; /* 小螢幕可換行 */
+      gap: 20px;
+    }
+
+    .left-column {
+      flex: 0;
+      min-width:500px;
+      max-width: 40%;  /* 將左半邊比例改小 */
+      display: flex;
+      flex-direction: column;
+      gap: 10px; /* 區塊之間留白 */
+      max-height: 100px; /* 設定最大高度 */
+      
+    }
+    .left-column .section:nth-child(2) {
+      height: 100px; /* 調整至你想要的高度 */
+      padding: 5px 10px; /* 可微調內邊距 */
+
+    }
+    .left-column .section:nth-child(3) {
+      height: 350px; /* 調整至你想要的高度 */
+      padding: 5px 10px; /* 可微調內邊距 */
+
+    }
+
+
+    /* 右邊欄位（圖表） */
+    .right-column {
+      flex: 1;
+      min-width: 200px;
+      max-width: 60%; /* 右邊佔據更多的空間 */
+       min-height: 500px; /* 或你想要的高度 */
+    }
+
+    /* 每個區塊的樣式：白底、圓角、內距與陰影 */
+    .section {
+      background-color: rgba(255, 255, 255, 0.75); /* 白色 + 50% 透明度 */;
+      border-radius: 20px;
+      padding: 10px;
+      box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    /* 區塊標題樣式 */
+    .section h3 {
+      font-size: 20px;
+
+      color: #2C3E50;
+      font-weight: 600;
+      margin-top: 0;
+    }
+
+    /* 風險預測文字樣式 */
+    #riskLevel {
+      font-size: 28px;
+      font-weight: bold;
+      color: #e74c3c;
+      background-color: #FFF176;
+      border: 2px solid #000000;
+      padding: 12px 20px;
+      border-radius: 12px;
+      display: block;  /* 改為 block 元素 */
+      text-align: left;  /* 設置為左對齊 */
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+      margin: 0;
+      width: fit-content; /* 自動調整寬度以適應內容 */
+      animation: flash-bg 1s infinite;
+    }
+
+    /* 今日預測機率樣式 */
+    #today-probability {
+      font-size: 22px;  /* 字型大小 */
+      font-weight: bold;
+      color: #272727; /* 黑色字體 */
+      padding: 5px 5px;  /* 調整內邊距以縮小區塊長度 */
+      background-color: #FBFFFD; /* 白背景 */
+      border-radius: 10px;
+      box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.1);
+      display: inline-block;
+      max-width: 100px;  /* 設定最大寬度，使區塊不會過大 */
+      text-align: center;  /* 文字置中 */
+      width: 100%;  /* 讓區塊根據內容自適應寬度 */
+      margin-top: -7px;  /* 調整位置往上移 */
+    }
+
+    /* 圓角圖表 */
+    canvas {
+      border-radius: 20px;
+      height: 400px !important;
+    }
+
+    /* 響應式設計：小螢幕排成一欄 */
+    @media (max-width: 780px) {
+      .main-container {
+        flex-direction: column;
+      }
+
+      .left-column {
+        max-width: 100%;  /* 小螢幕時，左邊佔滿全寬 */
+      }
+
+      .right-column {
+        max-width: 100%; /* 小螢幕時，右邊佔滿全寬 */
+      }
+    }
+
+    @keyframes flash-bg {
+      0%, 100% {
+        background-color: #FFF176;
+      }
+      50% {
+        background-color: #FFD54F;
+      }
+    }
+
+  </style>
 </head>
 
 <body>
-    <h1>露菌病預測</h1>
+  <!-- 網頁標題區塊 -->
+  <div style="text-align: center;">
+    <h1>露菌病預測系統</h1>
+  </div>
 
-    <div class="container">
-        <div class="left">
-            <h3>今天的預測機率：</h3>
-            <p id="today-probability">載入中...</p>
+  <!-- 主內容容器 -->
+  <div class="main-container">
+    <!-- 左半邊區塊：風險與機率 -->
+    <div class="left-column">
+      <!-- 風險預測顯示 -->
+      <div class="section">
+        <h3>風險預測：</h3>
+        <div style="text-align: center;">
+          <p id="riskLevel">載入中...</p>
         </div>
+      </div>
 
-        <div class="right">
-            <h3>最近七筆預測機率折線圖：</h3>
-            <canvas id="probabilityChart"></canvas>
-        </div>
+      <!-- 今日預測機率顯示 -->
+      <div class="section">
+        <h3>今天的預測機率：</h3>
+        <p id="today-probability">載入中...</p>
+      </div>
+      <div class="section">
+  <h3>監測結果：</h3>
+  <p><strong id="airTemp">空氣溫度: </strong></p>
+  <p><strong id="airHum">空氣濕度: </strong></p>
+  <p><strong id="soilTemp">土壤溫度: </strong></p>
+  <p><strong id="soilHum">土壤濕度: </strong></p>
+  <p><strong id="lightIntensity">光照強度: </strong></p>
+</div>
+
     </div>
 
-    <script>
-        // 當頁面載入完成時，呼叫後端 API 抓資料
-        fetch('/predict/')
-            .then(response => response.json())
-            .then(data => {
-                // 顯示今天的機率
-                document.getElementById('today-probability').textContent = (data.probability_of_1 * 100).toFixed(2) + '%';
+    <!-- 右半邊區塊：折線圖 -->
+    <div class="right-column">
+      <div class="section">
+        <h3>最近七筆預測機率折線圖：</h3>
+        <canvas id="probabilityChart"></canvas>
+      </div>
+    </div>
+  </div>
 
-                // 整理最近七筆資料
-                const dates = data.results.map(entry => entry.date);
-                const probabilities = data.results.map(entry => entry.probability_of_1);
+  <!-- JavaScript：載入後端 API 並更新頁面 -->
+  <script>
 
-                // 畫圖
-                const ctx = document.getElementById('probabilityChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: dates,
-                        datasets: [{
-                            label: '預測機率',
-                            data: probabilities,
-                            fill: false,
-                            borderColor: 'rgb(75, 192, 192)',
-                            tension: 0.1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                min: 0,
-                                max: 1
-                            }
-                        }
-                    }
-                });
-            });
-    </script>
+    // 呼叫後端 API '/predict/' 取得預測資料
+    fetch('/predict/')
+      .then(response => response.json()) // 將回傳的資料轉成 JSON 格式
+
+      .then(data => {
+        const probability = data.probability_of_1;
+
+        // 顯示今天的預測機率（轉為百分比顯示）
+        document.getElementById('today-probability').textContent = (probability * 100).toFixed(2) + '%';
+        // 顯示最新一筆資料
+        document.getElementById('airTemp').textContent = "空氣溫度: " + data.latest_data.air_temp + "°C";
+        document.getElementById('airHum').textContent = "空氣濕度: " + data.latest_data.air_hum + "%";
+        document.getElementById('soilTemp').textContent = "土壤溫度: " + data.latest_data.soil_temp + "°C";
+        document.getElementById('soilHum').textContent = "土壤濕度: " + data.latest_data.soil_hum + "%";
+        document.getElementById('lightIntensity').textContent = "光照強度: " + data.latest_data.light_intensity + " lx";
+        // 顯示風險等級文字與顏色
+        const riskElement = document.getElementById('riskLevel');
+        if (probability >= 0.7) {
+          riskElement.innerHTML = '⚠️ 高風險';
+          riskElement.style.color = '#272727'; // 紅色文字
+        } else {
+          riskElement.innerHTML = '✅ 風險較低';
+          riskElement.style.color = '#2c3e50'; // 深灰文字
+        }
+
+
+        // 取得最近七筆資料的日期與機率
+        const dates = data.results.map(entry => entry.date);
+        const probabilities = data.results.map(entry => entry.probability_of_1);
+
+        // 畫折線圖
+        const ctx = document.getElementById('probabilityChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: dates, // X 軸為日期
+            datasets: [{
+              label: '預測機率',
+              data: probabilities, // Y 軸為機率數據
+              fill: false,
+              borderColor: '#42906B', // 線的顏色（深綠）
+              tension: 0.1 // 線條平滑程度
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                min: 0,
+                max: 1 // 限制 Y 軸範圍 0~1
+              }
+            }
+          }
+        });
+
+
+      });
+
+  </script>
 </body>
 
 </html>

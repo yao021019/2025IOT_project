@@ -102,7 +102,13 @@
       width: fit-content; /* 自動調整寬度以適應內容 */
       animation: flash-bg 1s infinite;
     }
-
+    /*5/9改*/
+     /* 使ⓘ符號顯示更多內容並控制顯示文字大小 */
+     .info-icon {
+      font-size: 16px; /* 調整符號的大小 */
+      cursor: pointer; /* 讓符號有可點擊的提示效果 */
+    }
+    /*5/9改*/
     /* 今日預測機率樣式 */
     #today-probability {
       font-size: 22px;  /* 字型大小 */
@@ -148,6 +154,15 @@
         background-color: #FFD54F;
       }
     }
+    @keyframes flash-bg-safe {
+      0%, 100% {
+        background-color: #D0F0C0; /* 淡綠 */
+      }
+      50% {
+        background-color: #B2E8B2; /* 深一點綠 */
+      }
+    }
+
 
   </style>
 </head>
@@ -164,11 +179,13 @@
     <div class="left-column">
       <!-- 風險預測顯示 -->
       <div class="section">
-        <h3>風險預測：</h3>
-        <div style="text-align: center;">
-          <p id="riskLevel">載入中...</p>
-        </div>
-      </div>
+  <h3>風險預測： 
+    <span class="info-icon" title="機率超過 70% 連續三天則視為高風險">ⓘ</span><!--5/9改-->
+  </h3>
+  <div style="text-align: center;">
+    <p id="riskLevel">載入中...</p>
+  </div>
+</div>
 
       <!-- 今日預測機率顯示 -->
       <div class="section">
@@ -214,16 +231,22 @@
         document.getElementById('soilHum').textContent = "土壤濕度: " + data.latest_data.soil_hum + "%";
         document.getElementById('lightIntensity').textContent = "光照強度: " + data.latest_data.light_intensity + " lx";
         // 顯示風險等級文字與顏色
+        /*5/9改*/
         const riskElement = document.getElementById('riskLevel');
-        if (probability >= 0.7) {
+        const lastThree = data.results.slice(-3);  // 取最後三筆資料
+        const highRiskThreeDays = lastThree.every(entry => entry.probability_of_1 >= 0.70);
+        if (highRiskThreeDays >= 0.70) {
           riskElement.innerHTML = '⚠️ 高風險';
           riskElement.style.color = '#272727'; // 紅色文字
+          riskElement.style.backgroundColor = '#FFF176'; // 黃底
+          riskElement.style.animation = 'flash-bg 1s infinite'; // 加動畫
         } else {
           riskElement.innerHTML = '✅ 風險較低';
           riskElement.style.color = '#2c3e50'; // 深灰文字
+          riskElement.style.backgroundColor = '#D0F0C0'; // 淡綠底
+          riskElement.style.animation = 'flash-bg-safe 2s infinite'; // 綠色閃動動畫
         }
-
-
+        /*5/9改*/
         // 取得最近七筆資料的日期與機率
         const dates = data.results.map(entry => entry.date);
         const probabilities = data.results.map(entry => entry.probability_of_1);

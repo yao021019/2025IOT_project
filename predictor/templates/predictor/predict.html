@@ -196,7 +196,7 @@
   <h3>監測結果：</h3>
   <p><strong id="airTemp">空氣溫度: </strong></p>
   <p><strong id="airHum">空氣濕度: </strong></p>
-  <p><strong id="soilTemp">土壤溫度: </strong></p>
+  <!-- <p><strong id="soilTemp">土壤溫度: </strong></p> -->
   <p><strong id="soilHum">土壤濕度: </strong></p>
   <p><strong id="lightIntensity">光照強度: </strong></p>
 </div>
@@ -227,7 +227,7 @@
         // 顯示最新一筆資料
         document.getElementById('airTemp').textContent = "空氣溫度: " + data.latest_data.air_temp + "°C";
         document.getElementById('airHum').textContent = "空氣濕度: " + data.latest_data.air_hum + "%";
-        document.getElementById('soilTemp').textContent = "土壤溫度: " + data.latest_data.soil_temp + "°C";
+        // document.getElementById('soilTemp').textContent = "土壤溫度: " + data.latest_data.soil_temp + "°C";
         document.getElementById('soilHum').textContent = "土壤濕度: " + data.latest_data.soil_hum + "%";
         document.getElementById('lightIntensity').textContent = "光照強度: " + data.latest_data.light_intensity + " lx";
         // 顯示風險等級文字與顏色
